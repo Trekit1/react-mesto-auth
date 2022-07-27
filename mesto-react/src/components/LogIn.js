@@ -1,24 +1,17 @@
-import * as auth from "./Auth.js";
+import * as auth from "../utils/Auth";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
 
-function Login({ setLoggedIn }) {
+function Login({ userAuthorization }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
 
   function handleSubmit(evt) {
     evt.preventDefault();
-    auth
-      .authorization(email, password)
-      .then((res) => {
-        setLoggedIn(true);
-        history.push("/");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    userAuthorization(email, password);
   }
+
   return (
     <>
       <form className="authForm" onSubmit={handleSubmit}>

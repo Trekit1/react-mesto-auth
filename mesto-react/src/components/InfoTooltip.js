@@ -1,4 +1,7 @@
-function InfoTooltip({ name, onClose, image, title, isOpen }) {
+import success from "../images/Success.svg";
+import decline from "../images/Decline.svg";
+
+function InfoTooltip({ name, onClose, isOpen, isInfoTooltipKind }) {
   return (
     <div
       className={
@@ -14,8 +17,15 @@ function InfoTooltip({ name, onClose, image, title, isOpen }) {
           className="popup__close-button"
           onClick={onClose}
         ></button>
-        <img src={image} className="popup__image" />
-        <h2 className="popup__title popup__title_infoTooltip">{`${title}`}</h2>
+        <img
+          src={isInfoTooltipKind ? success : decline}
+          className="popup__image"
+        />
+        <h2 className="popup__title popup__title_infoTooltip">
+          {isInfoTooltipKind
+            ? "Вы успешно зарегистрировались!"
+            : "Что-то пошло не так! Попробуйте ещё раз."}
+        </h2>
       </form>
     </div>
   );

@@ -15,17 +15,15 @@ import ProtectedRoute from "./ProtectedRoute";
 import { api } from "../utils/Api";
 import { CurrentUserContext } from "../context/CurrentUserContext";
 import InfoTooltip from "./InfoTooltip";
-import success from "../images/Success.svg";
-import decline from "../images/Decline.svg";
-import * as auth from "./Auth.js";
+import * as auth from "../utils/Auth";
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState({});
-  const [isInfoTooltipSuccess, setInfoTooltipSuccess] = useState(false);
-  const [isInfoTooltipDecline, setInfoTooltipDecline] = useState(false);
+  const [isInfoTooltip, setInfoTooltip] = useState(false);
+  const [isInfoTooltipKind, setInfoTooltipKind] = useState(false);
   const [userData, setUserData] = useState({});
   const [loggedIn, setLoggedIn] = useState(false);
   const history = useHistory();
@@ -35,16 +33,14 @@ function App() {
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setSelectedCard({});
-    setInfoTooltipSuccess(false);
-    setInfoTooltipDecline(false);
+    setInfoTooltip(false);
   }
 
   //закрытие попапов по esc
   const isOpen =
     isEditAvatarPopupOpen ||
-    isInfoTooltipSuccess ||
+    isInfoTooltip ||
     isEditProfilePopupOpen ||
-    isInfoTooltipDecline ||
     isAddPlacePopupOpen ||
     selectedCard.link;
 
@@ -191,14 +187,45 @@ function App() {
     }
   }, [loggedIn]);
 
+  function getOut() {
+    localStorage.removeItem("token");
+    setLoggedIn(false);
+    history.push("/signin");
+  }
+
+  function userAuthorization(email, password) {
+    auth
+      .authorization(email, password)
+      .then((data) => {
+        localStorage.setItem("token", data.token);
+        setLoggedIn(true);
+        history.push("/");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  function userRegister(email, password) {
+    auth
+      .register(email, password)
+      .then((res) => {
+        if (res.data) {
+          setInfoTooltipKind(true);
+          setInfoTooltip(true);
+        }
+      })
+      .catch((err) => {
+        setInfoTooltipKind(false);
+        setInfoTooltip(true);
+        console.log(err);
+      });
+  }
+
   return (
     <div className="page__container">
       <CurrentUserContext.Provider value={currentUser}>
-        <Header
-          loggedIn={loggedIn}
-          setLoggedIn={setLoggedIn}
-          userData={userData}
-        />
+        <Header getOut={getOut} userData={userData} />
         <Switch>
           <ProtectedRoute
             exact
@@ -217,13 +244,13 @@ function App() {
             {loggedIn ? <Redirect to="/" /> : <Redirect to="/signin" />}
           </Route>
           <Route path="/signup">
-            <Register
-              setInfoTooltipSucces={setInfoTooltipSuccess}
-              setInfoTooltipDecline={setInfoTooltipDecline}
-            />
+            <Register userRegister={userRegister} />
           </Route>
           <Route path="/signin">
-            <Login setLoggedIn={setLoggedIn} />
+            <Login
+              setLoggedIn={setLoggedIn}
+              userAuthorization={userAuthorization}
+            />
           </Route>
         </Switch>
         <Footer />
@@ -251,17 +278,9 @@ function App() {
         />
         <InfoTooltip
           name="infoTooltip"
-          isOpen={isInfoTooltipSuccess}
+          isOpen={isInfoTooltip}
           onClose={closeAllPopups}
-          title="Вы успешно зарегистрировались!"
-          image={success}
-        />
-        <InfoTooltip
-          name="infoTooltip"
-          isOpen={isInfoTooltipDecline}
-          onClose={closeAllPopups}
-          title="Что-то пошло не так! Попробуйте ещё раз."
-          image={decline}
+          isInfoTooltipKind={isInfoTooltipKind}
         />
       </CurrentUserContext.Provider>
     </div>

@@ -1,8 +1,8 @@
 import { Link, useHistory } from "react-router-dom";
-import * as auth from "./Auth.js";
+import * as auth from "../utils/Auth";
 import { useState } from "react";
 
-function Register({ setInfoTooltipSucces, setInfoTooltipDecline }) {
+function Register({ userRegister }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -10,17 +10,7 @@ function Register({ setInfoTooltipSucces, setInfoTooltipDecline }) {
 
   function handleSubmit(evt) {
     evt.preventDefault();
-    auth
-      .register(email, password)
-      .then((res) => {
-        if (res.data) {
-          setInfoTooltipSucces(true);
-        }
-      })
-      .catch((err) => {
-        setInfoTooltipDecline(true);
-        console.log(err);
-      });
+    userRegister(email, password);
   }
 
   return (
